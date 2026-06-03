@@ -1,4 +1,5 @@
 import db from "../db/db.js";
+import bcrypt from "bcrypt";
 
 export const findUserByUsername = async (username) => {
     const [results] = await db.query(
@@ -9,9 +10,16 @@ export const findUserByUsername = async (username) => {
 };
 
 export const createUser = async (username, password, role = "user") => {
+    
+    if(!username) throw new Error("User name required");
+    if(!password) throw new Error("Password required");
+    if(role !== "user" && role !== "admin") throw new Error("invalid role");
+
+    const passwordHash = await hashPassword(password);
+
     const [result] = await db.execute(
         "INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
-        [username, password, role]
+        [username, passwordHash, role]
     );
 
     return {
@@ -20,3 +28,12 @@ export const createUser = async (username, password, role = "user") => {
         role
     };
 };
+
+export const hashPassword = async (plainPassword) => {
+    const saltRounds = 10;
+    return await bcrypt.hash(plainPassword, saltRounds);
+}
+
+export const validatePassword = async (plainPassword, storedHash) =>{
+    return await bcrypt.compare(plainPassword,storedHash);
+}

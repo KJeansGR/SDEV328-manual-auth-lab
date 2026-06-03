@@ -3,6 +3,8 @@ const homePage = (req, res) => {
 };
 
 const dashboardPage = (req, res) => {
+    console.log("Hello from dashboard");
+    console.log(req.user);
     res.render("dashboard", { title: "Member Dashboard" });
 };
 
